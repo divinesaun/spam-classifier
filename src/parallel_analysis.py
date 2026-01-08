@@ -10,7 +10,7 @@ def run_parallel_checks(message):
     
     with ThreadPoolExecutor(max_workers=2) as executor:
         whois_results = scan_url_with_whois(domain)
-        virustotal_results = scan_url_with_virustotal(domain)
+        virustotal_results = scan_url_with_virustotal(url)
     
     return {
         "url": url,
@@ -18,5 +18,3 @@ def run_parallel_checks(message):
         "whois": whois_results,
         "virustotal": virustotal_results
     }
-
-print(run_parallel_checks("Check weather updates here: https://www.google.com"))
