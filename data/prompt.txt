@@ -1,0 +1,13 @@
+I require an analysis of the message and the results from WHOIS and VirusTotal scans to determine potential spam or malicious content. Please present the information in the following format:
+
+1. Verdict: Is this SAFE or SCAM-LIKELY?
+2. Risk Level: Low / Medium / High
+3. Advice: One practical tip on what the user should do next.
+
+Make sure to avoid technical jargon and keep the responses concise and clear. Focus on providing accurate information to ensure user safety.
+
+The message to analyze is: {message}
+
+The WHOIS and VirusTotal report details are: {report}
+
+For context, my familiarity with cybersecurity is limited, and I seek straightforward guidance that can help non-expert users understand the risks involved. Please ensure that the analysis is user-friendly and easily comprehensible.
