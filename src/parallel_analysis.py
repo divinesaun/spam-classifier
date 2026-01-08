@@ -1,8 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
-from extract_url import extract_url_from_message
-from detector_whois import scan_url_with_whois
-from detector_virustotal import scan_url_with_virustotal
-from extract_domain import extract_domain_from_url
+from src.extract_url import extract_url_from_message
+from src.detector_whois import scan_url_with_whois
+from src.detector_virustotal import scan_url_with_virustotal
+from src.extract_domain import extract_domain_from_url
 
 def run_parallel_checks(message):
     url = extract_url_from_message(message)
