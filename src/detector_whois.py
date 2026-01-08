@@ -18,8 +18,14 @@ def scan_url_with_whois(domain):
 
         age_days = None
         if creation:
-            age_days = (datetime.utcnow() - creation).days
+            # Handle timezone-aware vs naive datetimes
+            if creation.tzinfo:
+                now = datetime.now(creation.tzinfo)
+            else:
+                now = datetime.utcnow()
+            age_days = (now - creation).days
 
+        logging.info("WHOIS detection finished✔️")
         return {
             "source": "WHOIS",
             "domain_age_days": age_days,
@@ -30,6 +36,7 @@ def scan_url_with_whois(domain):
         }
 
     except Exception as e:
+        logging.error(e)
         return {
             "source": "WHOIS",
             "error": str(e)
