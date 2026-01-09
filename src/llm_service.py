@@ -11,8 +11,14 @@ with open("./data/prompt.txt", "r") as f:
     prompt = f.read()
 
 def llm_scan_judgement(message, report):
-    response = model.generate_content(prompt.format(message=message, report=report))
-    return {
-        "message": message,
-        "response": response.candidates[0].content.parts[0].text
-    }
+    try:
+        response = model.generate_content(prompt.format(message=message, report=report))
+        return {
+            "message": message,
+            "response": response.candidates[0].content.parts[0].text
+        }
+    except Exception as e:
+        return {
+            "message": message,
+            "response": e
+        }
