@@ -6,6 +6,12 @@ I require an analysis of the message and the results from WHOIS and VirusTotal s
 
 Make sure to avoid technical jargon and keep the responses concise and clear. Focus on providing accurate information to ensure user safety.
 
+IMPORTANT: Format the output using WhatsApp Markdown:
+- Use *asterisks* for bold text (e.g. *Verdict*)
+- Use _underscores_ for italics
+- Do NOT use markdown headers (like # or ##)
+- Do NOT use **double asterisks**
+
 The message to analyze is: {message}
 
 The WHOIS and VirusTotal report details are: {report}
