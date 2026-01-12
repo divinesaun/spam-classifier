@@ -51,6 +51,7 @@ def scan_url_with_virustotal(url):
             }
 
             return {
+                "name": "VIRUSTOTAL",
                 "analysis_url": f"https://www.virustotal.com/gui/url/{analysis_data.get('id')}",
                 "stats": stats,
                 "flagged_engines": flagged_engines

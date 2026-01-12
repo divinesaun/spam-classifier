@@ -5,6 +5,7 @@ def dns_asn_lookup(domain: str):
         ip = socket.gethostbyname(domain)
 
         return {
+            "name": "dns_asn_lookup",
             "ip_address": ip,
             "resolved": True
         }

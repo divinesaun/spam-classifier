@@ -18,6 +18,7 @@ def url_lexical_analysis(url: str):
         path = parsed.path.lower()
 
         features = {
+            "name": "lexical_analysis",
             "length": len(url),
             "num_subdomains": len(subdomains),
             "has_ip": bool(re.search(r"\d+\.\d+\.d+\.\d+", hostname)),

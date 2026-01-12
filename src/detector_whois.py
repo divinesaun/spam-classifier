@@ -28,7 +28,7 @@ def scan_url_with_whois(domain):
 
             logging.info("WHOIS detection finished✔️")
             return {
-                "source": "WHOIS",
+                "name": "WHOIS",
                 "domain_age_days": age_days,
                 "registrar": w.registrar,
                 "country": w.country,
@@ -39,7 +39,7 @@ def scan_url_with_whois(domain):
         except Exception as e:
             logging.error(e)
             return {
-                "source": "WHOIS",
+                "name": "WHOIS",
                 "error": str(e)
             }
     else:
