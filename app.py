@@ -52,15 +52,36 @@ async def detect_spam(input: Message):
     logger.info(f"Incoming request: {input.text[:50]}...")
     return await analyze_message(input.text)
 
+from src.ocr_service import extract_text_from_image
+
 @app.post("/webhook")
-async def whatsapp_webhook(Body: str = Form(...)):
+async def whatsapp_webhook(
+    Body: str = Form(""),
+    NumMedia: int = Form(0),
+    MediaUrl0: str = Form(None)
+):
     """
     Twilio Webhook for WhatsApp.
-    Receives the message body, runs spam detection, and replies with the result.
+    Receives the message body and media. 
+    If an image is present, it uses OCR to extract text.
+    Then runs spam detection on the combined text and replies with the result.
     """
-    logger.info(f"Incoming WhatsApp message: {Body}")
+    logger.info(f"Incoming WhatsApp message. Body: {Body}, NumMedia: {NumMedia}")
     
-    analysis_result = await analyze_message(Body)
+    analyzed_text = Body
+    
+    # Check for image and run OCR if available
+    if NumMedia > 0 and MediaUrl0:
+        logger.info(f"Media detected. URL: {MediaUrl0}")
+        ocr_text = await extract_text_from_image(MediaUrl0)
+        if ocr_text:
+            logger.info(f"OCR extracted text: {ocr_text[:50]}...")
+            # Append OCR text to the user's message
+            analyzed_text = f"{Body}\n\n[OCR EXTRACTED CONTENT]:\n{ocr_text}"
+        else:
+            logger.warning("OCR failed to extract text or API error.")
+
+    analysis_result = await analyze_message(analyzed_text)
     response_text = analysis_result.get("response", "Could not analyze message.")
     
     # Create Twilio XML response
