@@ -1,7 +1,20 @@
+import logging
+import json
+
+# Configure logging centrally at the very top
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    force=True
+)
+logger = logging.getLogger(__name__)
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from src.parallel_analysis import run_parallel_checks
 from src.llm_service import llm_scan_judgement
+from src.extract_url import extract_url_from_message
+from src.extract_domain import extract_domain_from_url
 
 app = FastAPI(title="Spam Classifier")
 
@@ -9,7 +22,27 @@ class Message(BaseModel):
     text: str
 
 @app.post("/detect_spam")
-def detect_spam(input: Message):
-    report = run_parallel_checks(input.text)
+async def detect_spam(input: Message):
+    logger.info(f"Incoming request: {input.text[:50]}...")
+    
+    url = extract_url_from_message(input.text)
+    domain = extract_domain_from_url(url) if url else None
+    
+    if url and domain:
+        logger.info(f"Analyzing URL: {url} (Domain: {domain})")
+        report = await run_parallel_checks(url, domain)
+    else:
+        logger.warning("No URL found in message, skipping deep analysis")
+        report = {"info": "No URL found in message for deep analysis"}
+        
+    # Print information given to the LLM
+    print("\n" + "="*50)
+    print("DATA SENT TO LLM:")
+    print(json.dumps(report, indent=2))
+    print("="*50 + "\n")
+    
+    logger.info("Requesting judgment from LLM...")
     result = llm_scan_judgement(input.text, report)
+    logger.info("Spam analysis complete.")
+    
     return result

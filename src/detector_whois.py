@@ -1,46 +1,49 @@
 import whois
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
+logger = logging.getLogger(__name__)
 
 def scan_url_with_whois(domain):
-    if domain:
-        logging.info("Starting WHOIS scan")
-        try:
+    if not domain:
+        return {
+            "name": "WHOIS",
+            "error": "No domain provided"
+        }
 
-            w = whois.whois(domain)
-            creation = w.creation_date
-            if isinstance(creation, list):
-                creation = creation[0]
+    logger.info(f"Starting WHOIS scan for {domain}")
+    try:
+        w = whois.whois(domain)
+        creation = w.creation_date
+        if isinstance(creation, list):
+            creation = creation[0]
 
-            age_days = None
-            if creation:
-                # Handle timezone-aware vs naive datetimes
-                if creation.tzinfo:
-                    now = datetime.now(creation.tzinfo)
-                else:
-                    now = datetime.utcnow()
-                age_days = (now - creation).days
+        age_days = None
+        if creation:
+            # Handle timezone-aware vs naive datetimes
+            if creation.tzinfo:
+                now = datetime.now(creation.tzinfo)
+            else:
+                now = datetime.now(timezone.utc)
+                # If creation is naive, we might need to make it UTC-aware if we assume it's UTC
+                # However, many WHOIS servers return naive datetimes in UTC.
+                if creation.tzinfo is None:
+                    creation = creation.replace(tzinfo=timezone.utc)
+            
+            age_days = (now - creation).days
 
-            logging.info("WHOIS detection finished✔️")
-            return {
-                "name": "WHOIS",
-                "domain_age_days": age_days,
-                "registrar": w.registrar,
-                "country": w.country,
-                "is_recent_domain": (age_days != None) and (age_days < 90),
-                "has_private_registration": bool(w.get("privacy") or w.get("whois_server"))
-            }
+        logger.info("WHOIS detection finished✔️")
+        return {
+            "name": "WHOIS",
+            "domain_age_days": age_days,
+            "registrar": getattr(w, 'registrar', None),
+            "country": getattr(w, 'country', None),
+            "is_recent_domain": (age_days is not None) and (age_days < 90),
+            "has_private_registration": bool(w.get("privacy") or w.get("whois_server"))
+        }
 
-        except Exception as e:
-            logging.error(e)
-            return {
-                "name": "WHOIS",
-                "error": str(e)
-            }
-    else:
-        return None
+    except Exception as e:
+        logger.error(f"WHOIS error for {domain}: {e}")
+        return {
+            "name": "WHOIS",
+            "error": str(e)
+        }

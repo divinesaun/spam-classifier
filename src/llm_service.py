@@ -1,7 +1,9 @@
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 load_dotenv()
 
 model = genai.GenerativeModel("gemini-2.5-flash-lite")
@@ -11,6 +13,7 @@ with open("./data/prompt.txt", "r") as f:
     prompt = f.read()
 
 def llm_scan_judgement(message, report):
+    logger.info("Sending prompt and report to LLM for judgment")
     try:
         response = model.generate_content(prompt.format(message=message, report=report))
         return {
@@ -20,5 +23,5 @@ def llm_scan_judgement(message, report):
     except Exception as e:
         return {
             "message": message,
-            "response": e
+            "response": f"Error: {str(e)}"
         }

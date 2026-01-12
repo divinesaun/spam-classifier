@@ -1,9 +1,9 @@
 import re
 
 def extract_url_from_message(message):
-    url_pattern = r'(https?://[^\s]+)'
+    # Regex to find URLs, avoiding trailing punctuation
+    url_pattern = r'(https?://[^\s<>"]+?)(?=[.,;:?!]?(?:\s|$))'
     urls = re.findall(url_pattern, message)
-    if len(urls) > 0:
+    if urls:
         return urls[0]
-    else:
-        return None
+    return None
