@@ -1,11 +1,11 @@
 import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from src.detector_whois import scan_url_with_whois
-from src.detector_virustotal import scan_url_with_virustotal
-from src.lexical_analysis import lexical_analysis
-from src.dns_asn_lookup import dns_asn_lookup
-from src.tls_cert_inspection import tls_cert_inspection
+from .detector_whois import scan_url_with_whois
+from .detector_virustotal import scan_url_with_virustotal
+from .lexical_analysis import lexical_analysis
+from .dns_asn_lookup import dns_asn_lookup
+from .tls_cert_inspection import tls_cert_inspection
 
 logger = logging.getLogger(__name__)
 executor = ThreadPoolExecutor(max_workers=6)
