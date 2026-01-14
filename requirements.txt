@@ -19,8 +19,7 @@ fastapi==0.121.2
 filelock==3.20.2
 frozenlist==1.8.0
 fsspec==2026.1.0
-google-api-core
-google-ai-generativelanguage
+google-ai-generativelanguage>=0.6.15
 google-api-python-client==2.187.0
 google-auth==2.43.0
 google-auth-httplib2==0.2.1
