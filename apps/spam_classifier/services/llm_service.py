@@ -9,7 +9,7 @@ load_dotenv()
 model = genai.GenerativeModel("gemini-2.5-flash-lite")
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 prompt_path = os.path.join(BASE_DIR, "data", "prompt.txt")
 
 with open(prompt_path, "r") as f:
