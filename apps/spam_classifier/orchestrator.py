@@ -60,7 +60,7 @@ async def analyze_message_logic(text: str) -> AnalysisResult:
             logger.info("URL found in database. Returning cached result.")
             verdict = db_record.get('verdict', 'UNKNOWN')
             score = db_record.get('risk_score', 0)
-            llm_response_text = f"*Verdict*: {verdict}\n*Risk Level*: {'High' if score > 70 else 'Low'}\n*Advice*: previously analyzed as {verdict.lower()}."
+            llm_response_text = f"*Verdict*: {verdict}\n*Risk Level*: {'High' if score > 70 else 'Low'}\n*Previously Analysis*: Previously analyzed as {verdict.lower()}."
              
             return AnalysisResult(
                 url=url,
