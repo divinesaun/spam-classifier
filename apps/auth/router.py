@@ -23,18 +23,9 @@ async def signup(user: UserAuth):
     if not supabase:
         raise HTTPException(status_code=503, detail="Database unavailable")
     try:
-        # Use credentials parameter for SyncGoTrueClient
-        response = supabase.auth.sign_up(
-            credentials={"email": user.email, "password": user.password}
-        )
+        response = supabase.auth.sign_up({"email": user.email, "password": user.password})
         if response.user:
-            return {
-                "message": "User created successfully", 
-                "user": {
-                    "id": response.user.id,
-                    "email": response.user.email
-                }
-            }
+            return {"message": "User created successfully", "user": response.user}
         else:
              raise HTTPException(status_code=400, detail="Signup failed")
     except Exception as e:
@@ -45,10 +36,7 @@ async def signin(user: UserAuth):
     if not supabase:
         raise HTTPException(status_code=503, detail="Database unavailable")
     try:
-        # Use credentials parameter for SyncGoTrueClient
-        response = supabase.auth.sign_in_with_password(
-            credentials={"email": user.email, "password": user.password}
-        )
+        response = supabase.auth.sign_in_with_password({"email": user.email, "password": user.password})
         if response.session:
             return {"access_token": response.session.access_token, "token_type": "bearer"}
         else:

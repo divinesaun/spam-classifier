@@ -22,24 +22,19 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # --- CORS Configuration ---
-# For production, replace "*" with your actual frontend domain
 origins = [
     "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:4173",
-    "https://spam-classifier-frontend.vercel.app", # Example production URL
+    "http://localhost:5173", 
+    "*" 
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if "*" not in origins else ["*"],
-    allow_credentials=True if "*" not in origins else False,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Note: If you need both "*" and credentials, you must list the origins explicitly 
-# or use allow_origin_regex.
 
 # --- Include Routers ---
 app.include_router(spam_router, prefix="/spam", tags=["Spam Classifier"])
