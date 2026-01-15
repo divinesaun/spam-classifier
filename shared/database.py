@@ -48,14 +48,13 @@ async def create_user_api_key(user_id: str, name: str = "Default Key") -> Dict[s
     
     # Generate Key
     alphabet = string.ascii_letters + string.digits
-    new_key = ''.join(secrets.choice(alphabet) for i in range(32))
+    new_key = f"sc_{''.join(secrets.choice(alphabet) for i in range(32))}"
     
     data = {
         "key": new_key,
-        "owner_id": user_id,  # Linked to the Supabase User ID
+        "owner_id": user_id,
         "name": name,
-        "is_active": True,
-        "created_at": datetime.now().isoformat()
+        "is_active": True
     }
     
     try:

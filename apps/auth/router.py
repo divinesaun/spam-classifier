@@ -25,7 +25,13 @@ async def signup(user: UserAuth):
     try:
         response = supabase.auth.sign_up({"email": user.email, "password": user.password})
         if response.user:
-            return {"message": "User created successfully", "user": response.user}
+            return {
+                "message": "User created successfully", 
+                "user": {
+                    "id": response.user.id,
+                    "email": response.user.email
+                }
+            }
         else:
              raise HTTPException(status_code=400, detail="Signup failed")
     except Exception as e:
