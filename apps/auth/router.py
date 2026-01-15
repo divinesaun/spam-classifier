@@ -23,7 +23,11 @@ async def signup(user: UserAuth):
     if not supabase:
         raise HTTPException(status_code=503, detail="Database unavailable")
     try:
-        response = supabase.auth.sign_up({"email": user.email, "password": user.password})
+        # Use keyword arguments instead of positional dict
+        response = supabase.auth.sign_up(
+            email=user.email,
+            password=user.password
+        )
         if response.user:
             return {
                 "message": "User created successfully", 
@@ -42,7 +46,11 @@ async def signin(user: UserAuth):
     if not supabase:
         raise HTTPException(status_code=503, detail="Database unavailable")
     try:
-        response = supabase.auth.sign_in_with_password({"email": user.email, "password": user.password})
+        # Use keyword arguments instead of positional dict
+        response = supabase.auth.sign_in_with_password(
+            email=user.email,
+            password=user.password
+        )
         if response.session:
             return {"access_token": response.session.access_token, "token_type": "bearer"}
         else:
