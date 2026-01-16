@@ -15,9 +15,22 @@ class Message(BaseModel):
 
 @router.post("/detect_spam", response_model=AnalysisResult)
 @limiter.limit("5/minute")
-async def detect_spam(request: Request, input: Message, api_key: str = Depends(verify_api_key)):
+async def detect_spam(request: Request, input: Message, api_key_data = Depends(verify_api_key)):
     logger.info(f"Incoming request: {input.text[:50]}...")
-    return await analyze_message_logic(input.text)
+    
+    result = await analyze_message_logic(input.text)
+    
+    # Log usage if it's a database key (not master key)
+    if isinstance(api_key_data, dict) and "key" in api_key_data:
+        from shared.database import log_api_usage
+        await log_api_usage(
+            api_key=api_key_data["key"],
+            endpoint="/detect_spam",
+            method="POST",
+            status_code=200
+        )
+    
+    return result
 
 @router.post("/webhook")
 async def whatsapp_webhook(

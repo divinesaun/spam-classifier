@@ -2,7 +2,7 @@ import os
 import logging
 import secrets
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import Optional, Dict, Any, List
@@ -28,6 +28,8 @@ else:
 
 
 API_KEYS_TABLE = "api_keys"
+API_USAGE_TABLE = "api_usage"
+
 
 # --- API Key Management Functions ---
 
@@ -86,3 +88,72 @@ async def revoke_api_key(user_id: str, key_to_revoke: str):
     except Exception as e:
         logger.error(f"Error revoking API key: {e}")
         raise e
+
+# --- API Usage & Analytics ---
+
+async def log_api_usage(api_key: str, endpoint: str, method: str, status_code: int):
+    """Logs an API request for analytics."""
+    if not supabase: return
+    data = {
+        "api_key": api_key,
+        "endpoint": endpoint,
+        "method": method,
+        "status_code": status_code,
+        "timestamp": datetime.now().isoformat()
+    }
+    try:
+        supabase.table(API_USAGE_TABLE).insert(data).execute()
+    except Exception as e:
+        logger.error(f"Error logging API usage: {e}")
+
+async def get_user_usage_stats(user_id: str) -> Dict[str, Any]:
+    """Retrieves aggregated usage statistics for a user's API keys."""
+    if not supabase: return {}
+    
+    try:
+        # 1. Get all API keys for this user
+        keys_response = supabase.table(API_KEYS_TABLE).select("key").eq("owner_id", user_id).execute()
+        key_strings = [k["key"] for k in keys_response.data] if keys_response.data else []
+        
+        if not key_strings:
+            return {
+                "total_requests": 0,
+                "recent_requests_24h": 0,
+                "daily_stats": []
+            }
+
+        # 2. Get total requests
+        total_resp = supabase.table(API_USAGE_TABLE).select("id", count="exact").in_("api_key", key_strings).execute()
+        total_requests = total_resp.count if total_resp.count is not None else 0
+
+        # 3. Get requests in last 24h
+        yesterday = (datetime.now() - timedelta(days=1)).isoformat()
+        recent_resp = supabase.table(API_USAGE_TABLE).select("id", count="exact").in_("api_key", key_strings).gte("timestamp", yesterday).execute()
+        recent_requests = recent_resp.count if recent_resp.count is not None else 0
+
+        # 4. Daily stats (last 7 days) - aggregated in memory for simplicity
+        seven_days_ago = (datetime.now() - timedelta(days=7)).isoformat()
+        daily_resp = supabase.table(API_USAGE_TABLE).select("timestamp").in_("api_key", key_strings).gte("timestamp", seven_days_ago).execute()
+        
+        daily_counts = {}
+        if daily_resp.data:
+            for record in daily_resp.data:
+                date_str = record["timestamp"][:10]
+                daily_counts[date_str] = daily_counts.get(date_str, 0) + 1
+        
+        daily_stats = [{"date": d, "count": c} for d, c in sorted(daily_counts.items())]
+
+        return {
+            "total_requests": total_requests,
+            "recent_requests_24h": recent_requests,
+            "key_count": len(key_strings),
+            "daily_stats": daily_stats
+        }
+    except Exception as e:
+        logger.error(f"Error fetching usage stats: {e}")
+        return {
+            "error": str(e),
+            "total_requests": 0,
+            "recent_requests_24h": 0,
+            "daily_stats": []
+        }

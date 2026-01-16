@@ -66,3 +66,12 @@ async def revoke_key(key: str, user = Depends(get_current_user)):
     """Revokes a specific key."""
     await revoke_api_key(user.id, key)
     return {"status": "revoked"}
+
+# --- Analytics ---
+
+@router.get("/analytics")
+async def get_analytics(user = Depends(get_current_user)):
+    """Retrieves usage analytics for the logged-in user."""
+    from shared.database import get_user_usage_stats
+    stats = await get_user_usage_stats(user.id)
+    return stats
