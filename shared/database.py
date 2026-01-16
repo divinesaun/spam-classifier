@@ -112,8 +112,10 @@ async def get_user_usage_stats(user_id: str) -> Dict[str, Any]:
     
     try:
         # 1. Get all API keys for this user
-        keys_response = supabase.table(API_KEYS_TABLE).select("key").eq("owner_id", user_id).execute()
-        key_strings = [k["key"] for k in keys_response.data] if keys_response.data else []
+        # 1. Get all API keys for this user (fetching name as well for the report)
+        keys_response = supabase.table(API_KEYS_TABLE).select("key, name").eq("owner_id", user_id).execute()
+        user_keys = keys_response.data if keys_response.data else []
+        key_strings = [k["key"] for k in user_keys]
         
         if not key_strings:
             return {
@@ -136,6 +138,24 @@ async def get_user_usage_stats(user_id: str) -> Dict[str, Any]:
         daily_resp = supabase.table(API_USAGE_TABLE).select("timestamp").in_("api_key", key_strings).gte("timestamp", seven_days_ago).execute()
         
         daily_counts = {}
+        key_usage_counts = {} # Simple aggregation for the last 7 days + total check? 
+        # Actually, let's just do a separate quick aggregation for per-key total usage
+        
+        # 5. Usage by key (Total usage)
+        # Fetching count for each key is N+1 but safe for small number of keys (<20)
+        usage_by_key = []
+        for k in user_keys:
+            try:
+                count_resp = supabase.table(API_USAGE_TABLE).select("id", count="exact").eq("api_key", k["key"]).execute()
+                c = count_resp.count if count_resp.count is not None else 0
+                usage_by_key.append({
+                    "key": k["key"],
+                    "name": k.get("name", "Unknown"),
+                    "count": c
+                })
+            except:
+                pass
+
         if daily_resp.data:
             for record in daily_resp.data:
                 date_str = record["timestamp"][:10]
@@ -147,7 +167,8 @@ async def get_user_usage_stats(user_id: str) -> Dict[str, Any]:
             "total_requests": total_requests,
             "recent_requests_24h": recent_requests,
             "key_count": len(key_strings),
-            "daily_stats": daily_stats
+            "daily_stats": daily_stats,
+            "usage_by_key": usage_by_key
         }
     except Exception as e:
         logger.error(f"Error fetching usage stats: {e}")
