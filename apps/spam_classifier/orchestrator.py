@@ -3,6 +3,7 @@ import logging
 from .services.parallel_analysis import run_parallel_checks
 from .services.llm_service import llm_scan_judgement
 from .utils.extract_url import extract_url_from_message
+from .utils.extract_email import extract_emails_from_message
 from .utils.extract_domain import extract_domain_from_url
 from .services.ocr_service import extract_text_from_image
 from .repository import check_url_in_db, save_analysis_result
@@ -46,6 +47,7 @@ async def analyze_message_logic(text: str) -> AnalysisResult:
     
     url = extract_url_from_message(text)
     domain = extract_domain_from_url(url) if url else None
+    emails = extract_emails_from_message(text)
     
     report = {}
     verdict = "UNKNOWN"
@@ -72,12 +74,12 @@ async def analyze_message_logic(text: str) -> AnalysisResult:
             )
 
     # 2. Run Analysis if not in DB
-    if url and domain:
-        logger.info(f"Analyzing URL: {url} (Domain: {domain})")
-        report = await run_parallel_checks(url, domain)
+    if (url and domain) or emails:
+        logger.info(f"Analyzing URL: {url} (Domain: {domain}) | Emails: {len(emails)}")
+        report = await run_parallel_checks(url, domain, emails)
     else:
-        logger.warning("No URL found in message, skipping deep analysis")
-        report = {"info": "No URL found in message for deep analysis"}
+        logger.warning("No URL or emails found in message, skipping deep analysis")
+        report = {"info": "No URL or emails found in message for deep analysis"}
         
     # 3. LLM Judgement
     logger.info("Requesting judgment from LLM...")
