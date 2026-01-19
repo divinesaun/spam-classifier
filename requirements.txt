@@ -88,3 +88,7 @@ virustotal-api==1.1.11
 websockets==15.0.1
 wrapt==2.0.1
 yarl==1.22.0
+
+dnspython==2.6.1
+beautifulsoup4==4.12.3
+phonenumbers==8.13.39

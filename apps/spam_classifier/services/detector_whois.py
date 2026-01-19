@@ -37,6 +37,10 @@ def scan_url_with_whois(domain):
             "domain_age_days": age_days,
             "registrar": getattr(w, 'registrar', None),
             "country": getattr(w, 'country', None),
+            "emails": getattr(w, 'emails', None),
+            "name_servers": getattr(w, 'name_servers', None),
+            "expiration_date": str(w.expiration_date),
+            "creation_date": str(creation),
             "is_recent_domain": (age_days is not None) and (age_days < 90),
             "has_private_registration": bool(w.get("privacy") or w.get("whois_server"))
         }
