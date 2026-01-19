@@ -66,8 +66,9 @@ async def classify_intent(
         confidence = intent_scores[best_intent]
         
         # Log usage if it's a specific key (not master or dict)
-        if isinstance(api_key, dict) and 'id' in api_key:
-            await log_api_usage(api_key['id'], "/intent/classify")
+        if isinstance(api_key, dict) and 'key' in api_key:
+            await log_api_usage(api_key['key'], "/intent/classify", "POST", 200)
+
         
         return ClassifyResponse(
             text=request.text,

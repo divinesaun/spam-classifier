@@ -92,3 +92,4 @@ yarl==1.22.0
 dnspython==2.6.1
 beautifulsoup4==4.12.3
 phonenumbers==8.13.39
+spacy==3.8.11
