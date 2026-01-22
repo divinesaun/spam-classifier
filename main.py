@@ -9,7 +9,6 @@ from apps.spam_classifier.router import router as spam_router
 from apps.content_moderator.router import router as moderator_router
 from apps.auth.router import router as auth_router
 
-
 # Configure logging centrally
 logging.basicConfig(
     level=logging.INFO,
@@ -41,7 +40,6 @@ app.add_middleware(
 app.include_router(spam_router, prefix="/spam", tags=["Spam Classifier"])
 app.include_router(moderator_router, prefix="/moderator", tags=["Content Moderator"])
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-
 
 @app.get("/")
 async def root():
