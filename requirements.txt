@@ -4,8 +4,7 @@ pydantic
 pydantic-settings
 slowapi
 supabase
-spacy==3.8.0
-google-generativeai
+google-genai
 twilio
 python-whois
 tldextract
